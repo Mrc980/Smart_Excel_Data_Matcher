@@ -1,6 +1,5 @@
-import pandas as pd
+import python -m venv .venvpandas as pd
 import re
-import unicodedata
 
 
 def clean_text(value):
@@ -53,6 +52,25 @@ def clean_address(value):
     words = cleaned_words
 
     return " ".join(cleaned_words)
+
+def clean_postal_code(value):
+    value = clean_text(value)
+    return re.sub(r"[^a-z0-9]", "", value)
+
+def clean_phone(value):
+    if is_missing(value):
+        return ""
+
+    digits = re.sub(r"\D", "", str(value))
+
+    if len(digits) == 11 and digits.startswith("1"):
+        digits = digits[1:]
+
+    return digits
+
+def clean_email(value):
+    return clean_text(value)
+
 
     
     
