@@ -1,11 +1,15 @@
-import python -m venv .venvpandas as pd
+import pandas as pd
 import re
+
+
+def is_missing(value):
+    return pd.isna(value) or str(value).strip() == ""
 
 
 def clean_text(value):
     "converts value to formatted string and detects empty values"
 
-    if pd.isna(value):
+    if is_missing(value):
         return ""
 
     value = str(value)
@@ -49,7 +53,6 @@ def clean_address(value):
         else:
             cleaned_words.append(word)
 
-    words = cleaned_words
 
     return " ".join(cleaned_words)
 
@@ -59,12 +62,15 @@ def clean_postal_code(value):
 
 def clean_phone(value):
     if is_missing(value):
+
         return ""
 
     digits = re.sub(r"\D", "", str(value))
 
+
     if len(digits) == 11 and digits.startswith("1"):
         digits = digits[1:]
+
 
     return digits
 
