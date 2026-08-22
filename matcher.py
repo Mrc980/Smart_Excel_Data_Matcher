@@ -44,6 +44,42 @@ def find_missing_values(df, dataset_name):
                 issues.append(issue)
 
     return pd.DataFrame(issues)
+
+def find_duplicates(df, dataset_name):
+    duplicates = []
+
+    columns_to_check = ["ID", "Clean_Email", "Clean_Phone"]
+
+    for column in columns_to_check:
+        for index, row in df.iterrows():
+            value = row[column]
+
+            if is_missing(value):
+                continue
+
+            matches = df[df[column] == value]
+            if len(matches) > 1:
+                record_ids = []
+
+                for record_id in matches["ID"]:
+                    record_ids.append(str(record_id))
+
+                duplicate_info = {
+                    "Dataset": dataset_name,
+                    "Field": column,
+                    "Value": value,
+                    "Record_IDs": ", ".join(record_ids)
+                }
+
+                if duplicate_info not in duplicates:
+                    duplicates.append(duplicate_info)
+
+    return pd.DataFrame(duplicates)
+
+
+
+
+
         
             
 
