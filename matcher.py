@@ -6,8 +6,8 @@ from cleaning import (
     clean_phone,
     clean_postal_code,
     is_missing
-    
 )
+from rapidfuzz import fuzz
 
 df_a = pd.read_excel("sample_data/sample_data_A.xlsx")
 
@@ -77,14 +77,75 @@ def find_duplicates(df, dataset_name):
     return pd.DataFrame(duplicates)
 
 
+def calculate_field_scores(row_a, row_b):
+    name_score = fuzz.token_sort_ratio(
+        row_a["Clean_Name"],
+        row_b["Clean_Name"]
+    )
 
+    address_score = fuzz.token_sort_ratio(
+        row_a["Clean_Address"],
+        row_b["Clean_Address"]
+    )
 
+    city_score = fuzz.ratio(
+        row_a["Clean_City"],
+        row_b["Clean_City"]
+    )
 
-        
-            
+    if row_a["Clean_Postal_Code"] == row_b["Clean_Postal_Code"]:
+        postal_code_score = 100
+    else:
+        postal_code_score = 0
+
+    phone_score = 0
+    email_score = 0
+
+    if row_a["Clean_Phone"] != "" and row_b["Clean_Phone"] != "":
+        if row_a["Clean_Phone"] == row_b["Clean_Phone"]:
+            phone_score = 100
+
+    if row_a["Clean_Email"] != "" and row_b["Clean_Email"] != "":
+        email_score = fuzz.ratio(row_a["Clean_Email"], row_b["Clean_Email"])
+
+    contact_info_score = max(phone_score, email_score)
+
+    return {
+        "Name_Score": name_score,
+        "Address_Score": address_score,
+        "City_Score": city_score,
+        "Postal_Code_Score": postal_code_score,
+        "Contact_Info_Score": contact_info_score
+    }
+
+def calculate_overall_score(scores):
+
+    name_weight = 0.35
+    address_weight = 0.40
+    city_weight = 0.10
+    postal_code_weight = 0.10
+    contact_info_weight = 0.05
+
+    overall_score = (
+        scores["Name_Score"] * name_weight +
+        scores["Address_Score"] * address_weight +
+        scores["City_Score"] * city_weight +
+        scores["Postal_Code_Score"] * postal_code_weight +
+        scores["Contact_Info_Score"] * contact_info_weight
+    )
+
+    return round(overall_score, 1)
 
 df_a = clean_dataset(df_a)
 df_b = clean_dataset(df_b)
 
-print(df_a[["Name", "Clean_Name", "Address", "Clean_Address"]].head())
+row_a = df_a.iloc[0]
+row_b = df_b.iloc[0]
 
+scores = calculate_field_scores(row_a, row_b)
+
+print("Field Scores:")
+print(scores)
+
+print("Overall Score:")
+print(calculate_overall_score(scores))
