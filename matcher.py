@@ -166,34 +166,6 @@ def find_best_match(row_a, df_b):
     return best_match, best_scores, best_score
 
 
-def match_all_records(df_a, df_b):
-    results = []
-
-    for index, row_a in df_a.iterrows():
-        best_match, scores, overall_score = find_best_match(row_a, df_b)
-
-        result = {
-            "ID_A": row_a["ID"],
-            "Name_A": row_a["Name"],
-
-            "ID_B": best_match["ID"],
-            "Name_B": best_match["Name"],
-
-            "Name_Score": round(scores["Name_Score"], 1),
-            "Address_Score": round(scores["Address_Score"], 1),
-            "City_Score": round(scores["City_Score"], 1),
-            "Postal_Code_Score": scores["Postal_Code_Score"],
-            "Contact_Info_Score": round(scores["Contact_Info_Score"], 1),
-
-            "Overall_Score": overall_score,
-            "Match_Status": get_match_status(overall_score)
-        }
-
-        results.append(result)
-
-    return pd.DataFrame(results)
-
-
 def get_difference_flags(row_a, row_b):
     differences = []
 
@@ -216,6 +188,36 @@ def get_difference_flags(row_a, row_b):
         return "No major differences"
 
     return "; ".join(differences)
+
+
+def match_all_records(df_a, df_b):
+    results = []
+
+    for index, row_a in df_a.iterrows():
+        best_match, scores, overall_score = find_best_match(row_a, df_b)
+
+        result = {
+            "ID_A": row_a["ID"],
+            "Name_A": row_a["Name"],
+
+            "ID_B": best_match["ID"],
+            "Name_B": best_match["Name"],
+
+            "Name_Score": round(scores["Name_Score"], 1),
+            "Address_Score": round(scores["Address_Score"], 1),
+            "City_Score": round(scores["City_Score"], 1),
+            "Postal_Code_Score": scores["Postal_Code_Score"],
+            "Contact_Info_Score": round(scores["Contact_Info_Score"], 1),
+
+            "Overall_Score": overall_score,
+            "Match_Status": get_match_status(overall_score),
+
+            "Difference_Flags": get_difference_flags(row_a, best_match)
+        }
+
+        results.append(result)
+
+    return pd.DataFrame(results)
 
 
 
