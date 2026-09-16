@@ -118,6 +118,7 @@ def calculate_field_scores(row_a, row_b):
         "Contact_Info_Score": contact_info_score
     }
 
+
 def calculate_overall_score(scores):
 
     name_weight = 0.35
@@ -136,6 +137,7 @@ def calculate_overall_score(scores):
 
     return round(overall_score, 1)
 
+
 def get_match_status(score):
     if score >= 95:
         return "Match"
@@ -145,6 +147,7 @@ def get_match_status(score):
         return "Review Needed"
     else:
         return "Low Confidence"
+    
 
 def find_best_match(row_a, df_b):
     best_match = None
@@ -161,6 +164,7 @@ def find_best_match(row_a, df_b):
             best_scores = scores
 
     return best_match, best_scores, best_score
+
 
 def match_all_records(df_a, df_b):
     results = []
@@ -188,6 +192,30 @@ def match_all_records(df_a, df_b):
         results.append(result)
 
     return pd.DataFrame(results)
+
+
+def get_difference_flags(row_a, row_b):
+    differences = []
+
+    if row_a["Clean_Name"] != row_b["Clean_Name"]:
+        differences.append("Name differs")
+
+    if row_a["Clean_Address"] != row_b["Clean_Address"]:
+        differences.append("Address differs")
+
+    if row_a["Clean_Postal_Code"] != row_b["Clean_Postal_Code"]:
+        differences.append("Postal code differs")
+
+    if row_a["Clean_Phone"] != row_b["Clean_Phone"]:
+        differences.append("Phone differs")
+
+    if row_a["Clean_Email"] != row_b["Clean_Email"]:
+        differences.append("Email differs")
+
+    if len(differences) == 0:
+        return "No major differences"
+
+    return "; ".join(differences)
 
 
 
