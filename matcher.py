@@ -1,3 +1,4 @@
+from report import export_results
 import pandas as pd
 from cleaning import (
     clean_text,
@@ -224,18 +225,12 @@ def match_all_records(df_a, df_b):
 df_a = clean_dataset(df_a)
 df_b = clean_dataset(df_b)
 
-row_a = df_a.iloc[0]
-row_b = df_b.iloc[0]
-
-scores = calculate_field_scores(row_a, row_b)
-
-print("Field Scores:")
-print(scores)
-
-print("Overall Score:")
-print(calculate_overall_score(scores))
-
 matches = match_all_records(df_a, df_b)
 
-print("Matching Results:")
-print(matches)
+export_results(
+    matches,
+    "matching_results.xlsx"
+)
+
+print("Matching complete.")
+print("Results saved to matching_results.xlsx")
