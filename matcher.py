@@ -9,6 +9,7 @@ from cleaning import (
     is_missing
 )
 from rapidfuzz import fuzz
+from ai_review import review_match
 
 df_a = pd.read_excel("sample_data/sample_data_A.xlsx")
 
@@ -197,6 +198,38 @@ def match_all_records(df_a, df_b):
     for index, row_a in df_a.iterrows():
         best_match, scores, overall_score = find_best_match(row_a, df_b)
 
+        match_status = get_match_status(overall_score)
+        ai_review = "Not Needed"
+        ai_reason = ""
+
+        if match_status in ["Review Needed", "Low Confidence"]:
+            record_a = {
+                "name": row_a["Name"],
+                "address": row_a["Address"],
+                "city": row_a["City"],
+                "postal_code": row_a["Postal_Code"],
+                "phone": row_a["Phone"],
+                "email": row_a["Email"]
+            }
+
+            record_b = {
+                "name": best_match["Name"],
+                "address": best_match["Address"],
+                "city": best_match["City"],
+                "postal_code": best_match["Postal_Code"],
+                "phone": best_match["Phone"],
+                "email": best_match["Email"]
+
+            }
+
+            ai_review, ai_reason = review_match(
+                record_a,
+                record_b,
+                scores,
+                overall_score
+            )
+                    
+
         result = {
             "ID_A": row_a["ID"],
             "Name_A": row_a["Name"],
@@ -211,7 +244,10 @@ def match_all_records(df_a, df_b):
             "Contact_Info_Score": round(scores["Contact_Info_Score"], 1),
 
             "Overall_Score": overall_score,
-            "Match_Status": get_match_status(overall_score),
+            "Match_Status": match_status,
+
+            "AI_Review": ai_review,
+            "AI_Reason": ai_reason,
 
             "Difference_Flags": get_difference_flags(row_a, best_match)
         }
