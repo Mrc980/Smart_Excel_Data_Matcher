@@ -6,10 +6,14 @@ from openai import OpenAI
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key) if api_key else None
 
 
 def review_match(record_a, record_b, scores, overall_score):
+    if client is None:
+        return "Skipped", "OpenAI API key not configured"
+
     prompt = f"""
 Compare these two records and decide if they are likely the same person.
 
